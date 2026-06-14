@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="term2go — Go client library for the iTerm2 WebSocket API. Programmatic control of iTerm2 sessions, panes, variables, and more.">
+  <title>term2go — Go client for iTerm2</title>
+  <style>
+    /* ===== Design Tokens ===== */
+    :root {
+      --bg:          #0F172A;
+      --bg-elevated: #1E293B;
+      --bg-card:     #19223D;
+      --primary:     #22C55E;
+      --primary-dim: #16A34A;
+      --text:        #F8FAFC;
+      --text-muted:  #94A3B8;
+      --border:      #334155;
+      --border-dim:  #1E293B;
+      --ring:        #22C55E;
+      --radius:   10px;
+      --radius-sm: 6px;
+      --transition: 180ms ease-out;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a { color: var(--primary); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: var(--primary-dim); }
+
+    /* ===== Focus ===== */
+    :focus-visible {
+      outline: 2px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    /* ===== Utilities ===== */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ===== Layout ===== */
+    .section {
+      padding: 5rem 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    @media (max-width: 640px) { .section { padding: 3rem 1rem; } }
+
+    .text-center { text-align: center; }
+
+    .section-label {
+      font-family: monospace;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: monospace;
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 3rem;
+    }
+
+    /* ===== Nav ===== */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(15, 23, 42, 0.82);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--primary);
+    }
+    .nav-link {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+    .nav-link:hover { color: var(--text); }
+
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding-top: clamp(4rem, 12vh, 7rem);
+      padding-bottom: clamp(3rem, 8vh, 5rem);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 999px;
+      padding: 0.35rem 1rem;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: var(--primary);
+      margin-bottom: 2rem;
+    }
+    .hero-badge-dot {
+      width: 7px; height: 7px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+      50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+    }
+
+    .hero-title {
+      font-family: monospace;
+      font-size: clamp(2.2rem, 7vw, 3.8rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+    .hero-title span {
+      color: var(--primary);
+      text-shadow: 0 0 32px rgba(34, 197, 94, 0.35);
+    }
+
+    .hero-desc {
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      border-radius: var(--radius);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      border: 1px solid transparent;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #052E16;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background: var(--primary-dim);
+      box-shadow: 0 0 24px rgba(34, 197, 94, 0.3);
+      color: #052E16;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--bg-elevated);
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    .btn-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ===== Terminal Mock ===== */
+    .terminal {
+      background: #0A0E17;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 680px;
+      margin: 3rem auto 0;
+      box-shadow: 0 0 60px rgba(34, 197, 94, 0.06), 0 4px 24px rgba(0,0,0,0.5);
+    }
+    .terminal-bar {
+      background: var(--bg-elevated);
+      padding: 0.6rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .terminal-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .terminal-dot:nth-child(1) { background: #EF4444; }
+    .terminal-dot:nth-child(2) { background: #EAB308; }
+    .terminal-dot:nth-child(3) { background: var(--primary); }
+
+    .terminal-bar-title {
+      flex: 1;
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: center;
+      user-select: none;
+    }
+
+    .terminal-body {
+      padding: 1.25rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      line-height: 1.65;
+      overflow-x: auto;
+      text-align: left;
+    }
+    .terminal-body .prompt { color: var(--primary); }
+    .terminal-body .cmd { color: var(--text); }
+    .terminal-body .output { color: var(--text-muted); }
+    .terminal-body .cursor {
+      display: inline-block;
+      width: 8px; height: 1.05em;
+      background: var(--primary);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ===== Feature Grid ===== */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 768px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .feature-grid { grid-template-columns: 1fr; } }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .feature-card:hover {
+      border-color: rgba(34, 197, 94, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      width: 36px; height: 36px;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .feature-name {
+      font-family: monospace;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ===== Code Showcase ===== */
+    .code-showcase {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .code-showcase-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 1rem;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .code-showcase-tab {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      cursor: default;
+    }
+    .code-showcase-tab.active {
+      background: var(--bg);
+      color: var(--primary);
+    }
+    .code-showcase-body {
+      padding: 1.25rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      line-height: 1.65;
+      overflow-x: auto;
+    }
+    .code-kw { color: #A78BFA; }
+    .code-str { color: #FBBF24; }
+    .code-fn { color: #38BDF8; }
+    .code-comment { color: #64748B; font-style: italic; }
+
+    /* ===== Stats ===== */
+    .stats {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-family: monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* ===== CTA Section ===== */
+    .cta-box {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 4rem 0;
+    }
+    .cta-box .section-title { margin-bottom: 1rem; }
+    .cta-box .section-desc { margin-bottom: 2rem; }
+
+    /* ===== Footer ===== */
+    .footer {
+      border-top: 1px solid var(--border-dim);
+      padding: 2.5rem 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    .footer-brand {
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .footer-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ===== Related Projects ===== */
+    .related-box {
+      text-align: center;
+      padding: 3rem 0 0;
+      border-top: 1px solid var(--border-dim);
+      margin-top: 3rem;
+    }
+    .related-box .section-label { margin-bottom: 1.5rem; }
+    .related-box a {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--bg-card); border: 1px solid var(--border-dim);
+      border-radius: var(--radius); padding: 0.9rem 1.5rem;
+      transition: border-color var(--transition);
+    }
+    .related-box a:hover { border-color: var(--border); }
+    .related-box h4 {
+      font-family: monospace; font-size: 0.9rem; font-weight: 600;
+      color: var(--text);
+    }
+    .related-box p { font-size: 0.8rem; color: var(--text-muted); }
+    .related-box svg { width: 18px; height: 18px; color: var(--primary); flex-shrink: 0; }
+
+    /* ===== Reduced Motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/term2go/" class="nav-logo" aria-label="term2go home">term2go</a>
+      <div style="display:flex;gap:1.2rem;align-items:center;">
+        <a class="nav-link" href="#features">Features</a>
+        <a class="nav-link" href="https://github.com/phpgao/term2go">GitHub</a>
+        <a class="nav-link" href="https://pkg.go.dev/github.com/phpgao/term2go">pkg.go.dev</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- Hero -->
+    <section class="section hero" aria-labelledby="hero-title">
+      <div class="hero-badge">
+        <span class="hero-badge-dot" aria-hidden="true"></span>
+        <span id="version">v0.1.0</span> — Now on GitHub
+      </div>
+
+      <h1 id="hero-title" class="hero-title">
+        Go client for <span>iTerm2</span>
+      </h1>
+
+      <p class="hero-desc">
+        A developer-friendly Go library that mirrors the official iTerm2 Python API.
+        Control sessions, split panes, capture screenshots, subscribe to events —
+        all via WebSocket.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="https://github.com/phpgao/term2go" class="btn btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+        <a href="https://pkg.go.dev/github.com/phpgao/term2go" class="btn btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Read the Docs
+        </a>
+      </div>
+
+      <!-- Terminal mock -->
+      <div class="terminal" aria-hidden="true">
+        <div class="terminal-bar">
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-dot"></span>
+          <span class="terminal-bar-title">term2go — demo</span>
+        </div>
+        <pre class="terminal-body"><span class="prompt">$</span> <span class="cmd">go get github.com/phpgao/term2go</span>
+
+<span class="code-kw">package</span> main
+
+<span class="code-kw">import</span> <span class="code-str">"github.com/phpgao/term2go"</span>
+
+<span class="code-kw">func</span> <span class="code-fn">main</span>() {
+  term2go.<span class="code-fn">Run</span>(ctx, <span class="code-str">"my-app"</span>, <span class="code-kw">func</span>(caller term2go.Caller) <span class="code-kw">error</span> {
+    app, _ := term2go.<span class="code-fn">GetApp</span>(caller)
+    <span class="code-comment">// Control iTerm2 programmatically</span>
+    <span class="code-kw">return</span> <span class="code-kw">nil</span>
+  })
+}
+
+<span class="prompt">$</span> <span class="cmd">go run .</span>
+<span class="output">Window win_0: 1 tabs</span><span class="cursor" aria-hidden="true"></span></pre>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="section" aria-labelledby="features-title">
+      <p class="section-label text-center">Features</p>
+      <h2 id="features-title" class="section-title text-center">Everything you can do from iTerm2</h2>
+      <p class="section-desc text-center">
+        Full coverage of the iTerm2 Python API — sessions, panes, variables, events, and more.
+      </p>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <h3 class="feature-name">Session Control</h3>
+          <p class="feature-desc">SendText, GetBuffer, Inject, Activate, Close, Restart — complete session lifecycle.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+          <h3 class="feature-name">Pane &amp; Tab Management</h3>
+          <p class="feature-desc">SplitPane (vertical/horizontal), CreateTab, traverse nested splitter trees.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <h3 class="feature-name">Variables &amp; Properties</h3>
+          <p class="feature-desc">GetVariable, SetVariable, GetProperty, SetProperty, SetProfileProperty.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <h3 class="feature-name">Screenshot</h3>
+          <p class="feature-desc">Capture Window, Tab, or Session as PNG via native macOS screencapture.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <h3 class="feature-name">Event Subscription</h3>
+          <p class="feature-desc">Subscribe to new sessions, keystrokes, focus changes, variable changes.</p>
+        </article>
+
+        <article class="feature-card">
+          <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4"/><path d="M12 8v8"/></svg>
+          <h3 class="feature-name">RPC &amp; Notifications</h3>
+          <p class="feature-desc">Register custom RPCs, handle server-originated requests, extend iTerm2.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Code Showcase -->
+    <section class="section" aria-labelledby="code-title">
+      <p class="section-label text-center">API Preview</p>
+      <h2 id="code-title" class="section-title text-center">Dead simple to use</h2>
+      <p class="section-desc text-center">
+        Connect, traverse the window hierarchy, and send text — all in a few lines.
+      </p>
+
+      <div class="code-showcase">
+        <div class="code-showcase-header">
+          <span class="code-showcase-tab active">main.go</span>
+          <span class="code-showcase-tab">connection.go</span>
+        </div>
+        <pre class="code-showcase-body"><span class="code-kw">package</span> main
+<span class="code-kw">import</span> <span class="code-str">"github.com/phpgao/term2go"</span>
+<span class="code-kw">func</span> <span class="code-fn">main</span>() {
+  <span class="code-comment">// Connect to iTerm2 — auto-detects cookie/key</span>
+  term2go.<span class="code-fn">Run</span>(ctx, <span class="code-str">"my-app"</span>, <span class="code-kw">func</span>(caller term2go.Caller) <span class="code-kw">error</span> {
+    app, _ := term2go.<span class="code-fn">GetApp</span>(caller)
+    <span class="code-comment">// Traverse window → tab → session hierarchy</span>
+    <span class="code-kw">for</span> _, w := <span class="code-kw">range</span> app.Windows {
+      <span class="code-kw">for</span> _, t := <span class="code-kw">range</span> w.Tabs {
+        <span class="code-comment">// Send a command to each session</span>
+        sess := t.Root.<span class="code-fn">FindSessionByID</span>(<span class="code-str">"session-id"</span>)
+        sess.<span class="code-fn">SendText</span>(ctx, <span class="code-str">"echo Hello term2go!\n"</span>, <span class="code-kw">false</span>)
+      }
+    }
+    <span class="code-kw">return</span> <span class="code-kw">nil</span>
+  })
+}</pre>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value">30+</div>
+          <div class="stat-label">RPC Functions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">10+</div>
+          <div class="stat-label">Event Subscriptions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">Go 1.23+</div>
+          <div class="stat-label">Language Version</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">MIT</div>
+          <div class="stat-label">License</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related -->
+    <section class="section">
+      <div class="related-box">
+        <p class="section-label">Also Check Out</p>
+        <a href="https://phpgao.github.io/term2mcp/">
+          <div>
+            <h4>term2mcp</h4>
+            <p>MCP server — let AI assistants control your iTerm2</p>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" aria-labelledby="cta-title">
+      <div class="cta-box">
+        <h2 id="cta-title" class="section-title">Ready to build?</h2>
+        <p class="section-desc">
+          Control your terminal from Go. Star the repo, browse the examples, and start hacking.
+        </p>
+        <div class="hero-cta-group">
+          <a href="https://github.com/phpgao/term2go" class="btn btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            Star on GitHub
+          </a>
+          <a href="https://github.com/phpgao/term2go/blob/main/example/" class="btn btn-secondary">
+            Browse Examples
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">term2go</div>
+      <p class="footer-text" style="margin-top:.25rem;">Go client library for the iTerm2 WebSocket API</p>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/phpgao/term2go">GitHub</a>
+      <a href="https://pkg.go.dev/github.com/phpgao/term2go">pkg.go.dev</a>
+      <a href="https://github.com/phpgao/term2go/blob/main/LICENSE">MIT License</a>
+    </div>
+  </footer>
+
+<script>
+  (function() {
+    var el = document.getElementById('version');
+    if (!el) return;
+
+    try { var v = JSON.parse(localStorage.getItem('term2go_version')); } catch(e) {}
+    if (v && v.ts > Date.now() - 3600000) {
+      el.textContent = v.tag;
+      return;
+    }
+
+    fetch('https://api.github.com/repos/phpgao/term2go/releases/latest')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.tag_name) {
+          el.textContent = d.tag_name;
+          localStorage.setItem('term2go_version', JSON.stringify({tag: d.tag_name, ts: Date.now()}));
+        }
+      })
+      .catch(function() {
+        if (v) el.textContent = v.tag;
+      });
+  })();
+</script>
+
+</body>
+</html>
