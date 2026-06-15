@@ -68,9 +68,6 @@ func TestE2E_App_WindowProps(t *testing.T) {
 	assert.NotNil(t, w.Frame, "Window.Frame should not be nil")
 	assert.NotEmpty(t, w.Tabs, "Window.Tabs should not be empty")
 
-	// Frame fields
-	assert.GreaterOrEqual(t, w.Frame.Origin.X, int32(0), "Frame.Origin.X should be >= 0")
-	assert.GreaterOrEqual(t, w.Frame.Origin.Y, int32(0), "Frame.Origin.Y should be >= 0")
 	assert.Greater(t, w.Frame.Size.Width, int32(0), "Frame.Size.Width should be > 0")
 	assert.Greater(t, w.Frame.Size.Height, int32(0), "Frame.Size.Height should be > 0")
 

@@ -794,9 +794,7 @@ func TestDispatch_ProfileChange(t *testing.T) {
 	mu.Unlock()
 }
 
-// =============================================================================
 // notificationKeys (previously 0%)
-// =============================================================================
 
 // TestNotificationKeys_NewSession tests notificationKeys function for new session notification.
 func TestNotificationKeys_NewSession(t *testing.T) {

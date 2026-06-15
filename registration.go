@@ -11,9 +11,7 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
 // RPCArgs / RPCHandler / RPCRegistration
-// ============================================================================
 
 // RPCArgs holds named arguments from an iTerm2 server-originated RPC invocation.
 // Values are JSON-decoded from the notification's argument list.
@@ -48,10 +46,6 @@ const (
 	RPCRoleStatusBarComponent RPCRPCRole = 3
 	RPCRoleContextMenu        RPCRPCRole = 4
 )
-
-// ============================================================================
-// RPCRegistry
-// ============================================================================
 
 // RPCRegistry manages registered RPC handlers and dispatches incoming
 // ServerOriginatedRPCNotification messages to the correct handler.
@@ -220,7 +214,6 @@ func (r *RPCRegistry) dispatch(ctx context.Context, n *iterm2.ServerOriginatedRP
 	// Execute handler
 	result, err := handler(ctx, args)
 
-	// Build response
 	var respReq iterm2.ServerOriginatedRPCResultRequest
 	respReq.RequestId = proto.String(reqID)
 

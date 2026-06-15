@@ -406,9 +406,7 @@ func TestBufferInputConstants(t *testing.T) {
 	assert.Equal(t, 1, BufferInputStop)
 }
 
-// ============================================================================
 // Remaining trigger factory tests (for coverage)
-// ============================================================================
 
 // TestNewAnnotateTrigger tests NewAnnotateTrigger factory function.
 func TestNewAnnotateTrigger(t *testing.T) {

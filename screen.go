@@ -10,10 +10,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// ScreenContents
-// ============================================================================
-
 // ScreenContents wraps a GetBufferResponse with convenience accessors.  It
 // represents the visible region of a terminal session at a point in time.
 type ScreenContents struct {
@@ -60,10 +56,6 @@ func (s *ScreenContents) Lines() []*LineContent {
 
 // Raw returns the underlying proto response.
 func (s *ScreenContents) Raw() *iterm2.GetBufferResponse { return s.raw }
-
-// ============================================================================
-// LineContent
-// ============================================================================
 
 // LineContent wraps a LineContents proto, pre-computing per-cell offsets so
 // callers can do random-access lookups by column.
@@ -187,10 +179,6 @@ func expandStyles(styles []*iterm2.CellStyle) []*CellStyle {
 	return result
 }
 
-// ============================================================================
-// CellStyle
-// ============================================================================
-
 // CellStyle wraps a proto CellStyle with convenience accessors.
 type CellStyle struct {
 	raw *iterm2.CellStyle
@@ -313,10 +301,6 @@ func (c *CellStyle) BGPlacementY() (uint32, bool) {
 // HasBG reports whether background color is set.
 func (c *CellStyle) HasBG() bool { return c.raw.BgColor != nil }
 
-// ============================================================================
-// ScreenStreamer
-// ============================================================================
-
 // ScreenStreamer streams terminal screen contents on each update.
 // Create one with NewScreenStreamer, iterate over Chan(), and call Close()
 // when finished.
@@ -429,9 +413,7 @@ func (s *ScreenStreamer) Close() {
 	})
 }
 
-// ============================================================================
 // EnumerateRanges — selection utility
-// ============================================================================
 
 // EnumerateRanges iterates over a selected range, calling fn for each
 // line-contiguous sub-selection.

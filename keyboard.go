@@ -10,10 +10,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// KeystrokeEvent
-// ============================================================================
-
 // KeystrokeAction describes the type of keyboard event.
 type KeystrokeAction int
 
@@ -56,10 +52,6 @@ func (k *KeystrokeEvent) Action() KeystrokeAction {
 
 // Raw returns the underlying proto notification.
 func (k *KeystrokeEvent) Raw() *iterm2.KeystrokeNotification { return k.raw }
-
-// ============================================================================
-// KeystrokeMonitor
-// ============================================================================
 
 // KeystrokeMonitor streams keystroke events from a session.
 // Pass sessionID == "" to monitor all sessions.
@@ -144,10 +136,6 @@ func (km *KeystrokeMonitor) Close() {
 		close(km.ch)
 	})
 }
-
-// ============================================================================
-// KeystrokeFilter
-// ============================================================================
 
 // KeystrokeFilter tells iTerm2 to intercept keystrokes matching the given
 // patterns.  Intercepted keystrokes are not delivered to the terminal but are

@@ -11,10 +11,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// Alert
-// ============================================================================
-
 // ShowAlert displays a modal alert with buttons. Returns the button index (0-based).
 func ShowAlert(ctx context.Context, caller Caller, title, message string, buttons []string) (int, error) {
 	bs, _ := json.Marshal(buttons)
@@ -37,10 +33,6 @@ func ShowTextInputAlert(ctx context.Context, caller Caller, title, message, defa
 	}
 	return parseTextInputResult(resp)
 }
-
-// ============================================================================
-// PolyModalAlert
-// ============================================================================
 
 // PolyModalResult holds the returned values of a PolyModalAlert.
 type PolyModalResult struct {
@@ -141,10 +133,6 @@ func (a *PolyModalAlert) Run(ctx context.Context, caller Caller) (*PolyModalResu
 		Checkboxes: result.Checkboxes,
 	}, nil
 }
-
-// ============================================================================
-// File Panel Options
-// ============================================================================
 
 // OpenPanelOptions are flags for ShowOpenPanel.
 type OpenPanelOptions int
@@ -273,10 +261,6 @@ func ShowSavePanelWithOptions(ctx context.Context, caller Caller, title, message
 	}
 	return &SavePanelResult{File: file}, nil
 }
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 func jsonEncode(s string) string {
 	b, err := json.Marshal(s)

@@ -8,10 +8,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// Splitter
-// ============================================================================
-
 // SplitChild holds either a Session or a nested Splitter, but never both.
 // Use IsSession() or IsSplitter() to determine which field is set.
 type SplitChild struct {
@@ -128,4 +124,3 @@ func jsonDecodeForVariable(raw string) string {
 		return raw
 	}
 }
-

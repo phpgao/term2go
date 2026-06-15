@@ -2,6 +2,7 @@ package term2go
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"google.golang.org/protobuf/proto"
@@ -49,6 +50,19 @@ func NewColorWithColorSpace(r, g, b float64, cs string) *Color {
 		Alpha:      255,
 		ColorSpace: cs,
 	}
+}
+
+// ToProfileJSON returns a JSON representation suitable for SetProfileProperty.
+// Red/Green/Blue/Alpha are converted from 0-255 to 0-1 scale.
+func (c *Color) ToProfileJSON() string {
+	b, _ := json.Marshal(map[string]interface{}{
+		"Red Component":   c.Red / 255.0,
+		"Green Component": c.Green / 255.0,
+		"Blue Component":  c.Blue / 255.0,
+		"Alpha Component": c.Alpha / 255.0,
+		"Color Space":     c.ColorSpace,
+	})
+	return string(b)
 }
 
 // ColorPreset is a named collection of colors for terminal attributes.

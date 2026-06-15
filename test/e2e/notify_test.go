@@ -19,10 +19,7 @@ func getSessionID(t *testing.T, scriptName string) string {
 	return firstSession(t, app).ID
 }
 
-// ============================================================================
 // TestE2E_Notify_NewSession — trigger: create a new tab
-// ============================================================================
-
 func TestE2E_Notify_NewSession(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -68,10 +65,7 @@ func TestE2E_Notify_NewSession(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_TerminateSession — trigger: create + close a tab
-// ============================================================================
-
 func TestE2E_Notify_TerminateSession(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -117,10 +111,7 @@ func TestE2E_Notify_TerminateSession(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_Keystroke — trigger: send text
-// ============================================================================
-
 func TestE2E_Notify_Keystroke(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -162,10 +153,7 @@ func TestE2E_Notify_Keystroke(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_ScreenUpdate — trigger: send text triggers screen update
-// ============================================================================
-
 func TestE2E_Notify_ScreenUpdate(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -207,10 +195,7 @@ func TestE2E_Notify_ScreenUpdate(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_Prompt — trigger: send a command that produces a prompt
-// ============================================================================
-
 func TestE2E_Notify_Prompt(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -253,10 +238,7 @@ func TestE2E_Notify_Prompt(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_CustomEscapeSequence — hard to trigger, short wait
-// ============================================================================
-
 func TestE2E_Notify_CustomEscapeSequence(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -277,10 +259,7 @@ func TestE2E_Notify_CustomEscapeSequence(t *testing.T) {
 	t.Log("subscribe/unsubscribe succeeded")
 }
 
-// ============================================================================
 // TestE2E_Notify_VariableChange — trigger: set a variable
-// ============================================================================
-
 func TestE2E_Notify_VariableChange(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -322,10 +301,7 @@ func TestE2E_Notify_VariableChange(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_LayoutChange — trigger: split pane
-// ============================================================================
-
 func TestE2E_Notify_LayoutChange(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -371,10 +347,7 @@ func TestE2E_Notify_LayoutChange(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_FocusChange — trigger: activate a session
-// ============================================================================
-
 func TestE2E_Notify_FocusChange(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -417,10 +390,7 @@ func TestE2E_Notify_FocusChange(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_ServerOriginatedRPC — no trigger, verify subscribe only
-// ============================================================================
-
 func TestE2E_Notify_ServerOriginatedRPC(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -438,10 +408,7 @@ func TestE2E_Notify_ServerOriginatedRPC(t *testing.T) {
 	t.Log("subscribe/unsubscribe succeeded")
 }
 
-// ============================================================================
 // TestE2E_Notify_BroadcastChange — no trigger, verify subscribe only
-// ============================================================================
-
 func TestE2E_Notify_BroadcastChange(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -459,10 +426,7 @@ func TestE2E_Notify_BroadcastChange(t *testing.T) {
 	t.Log("subscribe/unsubscribe succeeded")
 }
 
-// ============================================================================
 // TestE2E_Notify_ProfileChange — trigger: set profile property
-// ============================================================================
-
 func TestE2E_Notify_ProfileChange(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()
@@ -509,10 +473,7 @@ func TestE2E_Notify_ProfileChange(t *testing.T) {
 	}
 }
 
-// ============================================================================
 // TestE2E_Notify_MultipleSubscribe — subscribe 3, short wait
-// ============================================================================
-
 func TestE2E_Notify_MultipleSubscribe(t *testing.T) {
 	skipIfNoITerm2(t)
 	ctx := context.Background()

@@ -62,7 +62,6 @@ func (m *mockWS) Close() error {
 func (m *mockWS) SetReadDeadline(t time.Time) error { return nil }
 func (m *mockWS) SetReadLimit(limit int64)          {}
 
-// Interface compliance
 func TestCallerInterface(t *testing.T) {
 	var _ Caller = (*Connection)(nil)
 	var _ Notifier = (*Connection)(nil)

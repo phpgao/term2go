@@ -10,10 +10,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// Types
-// ============================================================================
-
 // NotificationToken identifies a subscription so it can be unsubscribed.
 type NotificationToken struct {
 	seq int64
@@ -26,10 +22,6 @@ type notifyEntry struct {
 	seq     int64
 	handler NotificationHandler
 }
-
-// ============================================================================
-// Dispatch
-// ============================================================================
 
 // Dispatch routes an incoming ServerOriginatedMessage that carries a
 // Notification to every matching subscribed handler on this connection.
@@ -145,10 +137,6 @@ func notificationKeys(n *iterm2.Notification) []string {
 	return keys
 }
 
-// ============================================================================
-// Unsubscribe
-// ============================================================================
-
 // Unsubscribe removes a previously registered notification handler and, if it
 // was the last handler for its key, sends an unsubscribe RPC to iTerm2.
 func (c *Connection) Unsubscribe(token NotificationToken) {
@@ -176,10 +164,6 @@ func (c *Connection) Unsubscribe(token NotificationToken) {
 		_ = doUnsubscribe(context.Background(), c.caller(), token.nt, token.sid)
 	}
 }
-
-// ============================================================================
-// Internal helpers
-// ============================================================================
 
 func (c *Connection) storeHandler(key string, h NotificationHandler) NotificationToken {
 	tk := NotificationToken{seq: atomic.AddInt64(&c.notifySeq, 1), key: key}
@@ -226,10 +210,6 @@ func doUnsubscribe(ctx context.Context, caller Caller, nt iterm2.NotificationTyp
 	return notifyRPC(ctx, caller, false, nt, sessionID, nil)
 }
 
-// ============================================================================
-// SubscribeNewSession
-// ============================================================================
-
 // SubscribeNewSession registers a callback that fires when a new iTerm2
 // session is created.
 func SubscribeNewSession(ctx context.Context, caller Caller, c *Connection,
@@ -253,10 +233,6 @@ func SubscribeNewSession(ctx context.Context, caller Caller, c *Connection,
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeTerminateSession
-// ============================================================================
-
 // SubscribeTerminateSession registers a callback that fires when an iTerm2
 // session terminates.
 func SubscribeTerminateSession(ctx context.Context, caller Caller, c *Connection,
@@ -279,10 +255,6 @@ func SubscribeTerminateSession(ctx context.Context, caller Caller, c *Connection
 	tk.nt = iterm2.NotificationType_NOTIFY_ON_TERMINATE_SESSION
 	return tk, nil
 }
-
-// ============================================================================
-// SubscribeKeystroke
-// ============================================================================
 
 // SubscribeKeystroke registers a callback that fires when a key is pressed in
 // sessionID.  Pass sessionID == "" to monitor all sessions.
@@ -314,10 +286,6 @@ func SubscribeKeystroke(ctx context.Context, caller Caller, c *Connection,
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeScreenUpdate
-// ============================================================================
-
 // SubscribeScreenUpdate registers a callback that fires when the screen
 // contents change for sessionID.  Pass sessionID == "" for all sessions.
 func SubscribeScreenUpdate(ctx context.Context, caller Caller, c *Connection,
@@ -341,10 +309,6 @@ func SubscribeScreenUpdate(ctx context.Context, caller Caller, c *Connection,
 	tk.sid = sessionID
 	return tk, nil
 }
-
-// ============================================================================
-// SubscribePrompt
-// ============================================================================
 
 // SubscribePrompt registers a callback that fires when a shell prompt is
 // detected in sessionID.
@@ -380,10 +344,6 @@ func SubscribePrompt(ctx context.Context, caller Caller, c *Connection,
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeCustomEscapeSequence
-// ============================================================================
-
 // SubscribeCustomEscapeSequence registers a callback that fires when a custom
 // escape sequence (OSC 1337 ; Custom=...) is received in sessionID.
 func SubscribeCustomEscapeSequence(ctx context.Context, caller Caller, c *Connection,
@@ -407,10 +367,6 @@ func SubscribeCustomEscapeSequence(ctx context.Context, caller Caller, c *Connec
 	tk.sid = sessionID
 	return tk, nil
 }
-
-// ============================================================================
-// SubscribeVariableChange
-// ============================================================================
 
 // SubscribeVariableChange registers a callback that fires when variableName
 // changes in sessionID.  The sessionID is used as both the session filter on
@@ -450,10 +406,6 @@ func SubscribeVariableChange(ctx context.Context, caller Caller, c *Connection,
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeLayoutChange
-// ============================================================================
-
 // SubscribeLayoutChange registers a callback that fires when the window/tab
 // layout changes.
 func SubscribeLayoutChange(ctx context.Context, caller Caller, c *Connection,
@@ -477,10 +429,6 @@ func SubscribeLayoutChange(ctx context.Context, caller Caller, c *Connection,
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeFocusChange
-// ============================================================================
-
 // SubscribeFocusChange registers a callback that fires when the focused window
 // or session changes.
 func SubscribeFocusChange(ctx context.Context, caller Caller, c *Connection,
@@ -503,10 +451,6 @@ func SubscribeFocusChange(ctx context.Context, caller Caller, c *Connection,
 	tk.nt = iterm2.NotificationType_NOTIFY_ON_FOCUS_CHANGE
 	return tk, nil
 }
-
-// ============================================================================
-// SubscribeServerOriginatedRPC
-// ============================================================================
 
 // SubscribeServerOriginatedRPC registers a callback that fires when iTerm2
 // invokes a server-originated RPC.  Use name == "" to match all RPC names.
@@ -537,10 +481,6 @@ func SubscribeServerOriginatedRPC(ctx context.Context, caller Caller, c *Connect
 	return tk, nil
 }
 
-// ============================================================================
-// SubscribeBroadcastChange
-// ============================================================================
-
 // SubscribeBroadcastChange registers a callback that fires when the broadcast
 // domains change.
 func SubscribeBroadcastChange(ctx context.Context, caller Caller, c *Connection,
@@ -563,10 +503,6 @@ func SubscribeBroadcastChange(ctx context.Context, caller Caller, c *Connection,
 	tk.nt = iterm2.NotificationType_NOTIFY_ON_BROADCAST_CHANGE
 	return tk, nil
 }
-
-// ============================================================================
-// SubscribeProfileChange
-// ============================================================================
 
 // SubscribeProfileChange registers a callback that fires when a profile
 // changes.  Pass guid == "" to match all profiles.

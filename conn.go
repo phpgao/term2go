@@ -22,10 +22,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// Interfaces
-// ============================================================================
-
 // Caller abstracts the ability to make RPC calls to iTerm2.
 type Caller interface {
 	Call(ctx context.Context, req *iterm2.ClientOriginatedMessage) (*iterm2.ServerOriginatedMessage, error)
@@ -60,10 +56,6 @@ const (
 	defaultCallTimeout      = 30 * time.Second
 	defaultHandshakeTimeout = 45 * time.Second
 )
-
-// ============================================================================
-// Connection
-// ============================================================================
 
 // Connection manages the WebSocket connection to iTerm2.
 type Connection struct {
@@ -495,10 +487,6 @@ func Connect(ctx context.Context, scriptName string) (*Connection, error) {
 	}
 	return conn, nil
 }
-
-// ============================================================================
-// Authentication
-// ============================================================================
 
 // AuthProvider provides authentication credentials.
 type AuthProvider interface {

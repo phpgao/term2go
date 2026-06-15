@@ -76,6 +76,18 @@ func successResp(sub proto.Message) *iterm2.ServerOriginatedMessage {
 		s.Submessage = &iterm2.ServerOriginatedMessage_SavedArrangementResponse{SavedArrangementResponse: v}
 	case *iterm2.InvokeFunctionResponse:
 		s.Submessage = &iterm2.ServerOriginatedMessage_InvokeFunctionResponse{InvokeFunctionResponse: v}
+	case *iterm2.GetBroadcastDomainsResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_GetBroadcastDomainsResponse{GetBroadcastDomainsResponse: v}
+	case *iterm2.SetBroadcastDomainsResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_SetBroadcastDomainsResponse{SetBroadcastDomainsResponse: v}
+	case *iterm2.ReorderTabsResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_ReorderTabsResponse{ReorderTabsResponse: v}
+	case *iterm2.SetProfilePropertyResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_SetProfilePropertyResponse{SetProfilePropertyResponse: v}
+	case *iterm2.SetPropertyResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_SetPropertyResponse{SetPropertyResponse: v}
+	case *iterm2.ColorPresetResponse:
+		s.Submessage = &iterm2.ServerOriginatedMessage_ColorPresetResponse{ColorPresetResponse: v}
 	}
 	return &s
 }

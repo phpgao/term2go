@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	iterm2 "github.com/phpgao/term2go/proto"
 )
@@ -241,4 +242,158 @@ func TestSession_GetScreenStreamer(t *testing.T) {
 // helper to create a string pointer
 func ptrString(s string) *string {
 	return &s
+}
+
+// Tab properties from proto
+
+func TestTab_AllSessions(t *testing.T) {
+	root := &Splitter{
+		Children: []SplitChild{
+			{Session: &Session{ID: "s1"}},
+			{Session: &Session{ID: "s2"}},
+		},
+	}
+	tab := &Tab{
+		ID:                "t1",
+		Root:              root,
+		MinimizedSessions: []*Session{{ID: "s3"}},
+	}
+	all := tab.AllSessions()
+	assert.Len(t, all, 3)
+}
+
+func TestTab_AllSessions_NoMinimized(t *testing.T) {
+	tab := &Tab{
+		ID: "t1",
+		Root: &Splitter{
+			Children: []SplitChild{
+				{Session: &Session{ID: "s1"}},
+			},
+		},
+	}
+	assert.Len(t, tab.AllSessions(), 1)
+}
+
+func TestTab_TmuxWindowID(t *testing.T) {
+	tab := &Tab{TmuxWindowID: "tmux-win-1"}
+	assert.Equal(t, "tmux-win-1", tab.TmuxWindowID)
+}
+
+// Transaction
+
+func TestTransaction_BeginEnd(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{resp: &iterm2.ServerOriginatedMessage{}}
+	tx := NewTransaction(mc)
+	err := tx.Begin(ctx)
+	require.NoError(t, err)
+	assert.True(t, tx.started)
+	assert.True(t, mc.req.GetTransactionRequest().GetBegin())
+
+	err = tx.End(ctx)
+	require.NoError(t, err)
+	assert.False(t, tx.started)
+	assert.False(t, mc.req.GetTransactionRequest().GetBegin())
+}
+
+func TestTransaction_BeginTwice(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{resp: &iterm2.ServerOriginatedMessage{}}
+	tx := NewTransaction(mc)
+	require.NoError(t, tx.Begin(ctx))
+	err := tx.Begin(ctx)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already started")
+}
+
+func TestTransaction_EndWithoutBegin(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	tx := NewTransaction(&mockCaller{})
+	err := tx.End(ctx)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not started")
+}
+
+// Preferences
+
+func TestGetPreference(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{
+		resp: successResp(&iterm2.PreferencesResponse{
+			Results: []*iterm2.PreferencesResponse_Result{
+				{
+					Result: &iterm2.PreferencesResponse_Result_GetPreferenceResult_{
+						GetPreferenceResult: &iterm2.PreferencesResponse_Result_GetPreferenceResult{
+							JsonValue: ptrString("true"),
+						},
+					},
+				},
+			},
+		}),
+	}
+	val, err := GetPreference(ctx, mc, PrefQuitWhenAllWindowsClosed)
+	require.NoError(t, err)
+	assert.Equal(t, "true", val)
+}
+
+func TestGetPreference_Empty(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{
+		resp: successResp(&iterm2.PreferencesResponse{}),
+	}
+	val, err := GetPreference(ctx, mc, PrefSmartPlacement)
+	require.NoError(t, err)
+	assert.Empty(t, val)
+}
+
+func TestSetPreference(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{resp: &iterm2.ServerOriginatedMessage{}}
+	err := SetPreference(ctx, mc, PrefQuitWhenAllWindowsClosed, "true")
+	require.NoError(t, err)
+	reqs := mc.req.GetPreferencesRequest().GetRequests()
+	require.Len(t, reqs, 1)
+	sp := reqs[0].GetSetPreferenceRequest()
+	require.NotNil(t, sp)
+	assert.Equal(t, "QuitWhenAllWindowsClosed", sp.GetKey())
+	assert.Equal(t, "true", sp.GetJsonValue())
+}
+
+func TestSetPreferenceJSON(t *testing.T) {
+	ctx, cancel := testCtx()
+	defer cancel()
+
+	mc := &mockCaller{resp: &iterm2.ServerOriginatedMessage{}}
+	err := SetPreferenceJSON(ctx, mc, PrefIRMemory, 100)
+	require.NoError(t, err)
+	assert.Equal(t, "100", mc.req.GetPreferencesRequest().GetRequests()[0].GetSetPreferenceRequest().GetJsonValue())
+}
+
+// PreferenceKey constants
+
+func TestPreferenceKeys(t *testing.T) {
+	assert.Equal(t, PreferenceKey("QuitWhenAllWindowsClosed"), PrefQuitWhenAllWindowsClosed)
+	assert.Equal(t, PreferenceKey("UseMetal"), PrefUseMetal)
+	assert.Equal(t, PreferenceKey("TabStyleWithAutomaticOption"), PrefTheme)
+}
+
+// NavigationDirection
+
+func TestNavigationDirection(t *testing.T) {
+	assert.Equal(t, NavigationDirection("left"), DirectionLeft)
+	assert.Equal(t, NavigationDirection("right"), DirectionRight)
+	assert.Equal(t, NavigationDirection("above"), DirectionAbove)
+	assert.Equal(t, NavigationDirection("below"), DirectionBelow)
 }

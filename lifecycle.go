@@ -8,10 +8,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// EachSessionOnce
-// ============================================================================
-
 // EachSessionOnce calls fn exactly once for every session — including those
 // that already exist and those created in the future. It subscribes to new
 // session notifications on the connection so the callback fires automatically

@@ -8,9 +8,7 @@ import (
 	"strings"
 )
 
-// ============================================================================
 // Trigger — unified struct for all iTerm2 trigger types
-// ============================================================================
 
 // Trigger provides a unified representation of all iTerm2 trigger types.
 // Use New*Trigger factory functions to create specific types, and the
@@ -28,12 +26,12 @@ type Trigger struct {
 	EventParams map[string]interface{}
 
 	// Pre-parsed parameters for convenience (set by factory/decode)
-	parsedActions  []string // for types that use `param` as multiple values
-	ExitCode  string   // CommandFinishedEvent: "*", "0", "!0"
-	Threshold float64  // IdleEvent/ActivityAfterIdle/LongRunningCommand
-	Timeout   float64  // IdleEvent/ActivityAfterIdle
-	Sequence  string   // CustomEscapeSequenceEvent
-	Progress  string   // ProgressBarChangedEvent: "*", "appeared", "disappeared"
+	parsedActions []string // for types that use `param` as multiple values
+	ExitCode      string   // CommandFinishedEvent: "*", "0", "!0"
+	Threshold     float64  // IdleEvent/ActivityAfterIdle/LongRunningCommand
+	Timeout       float64  // IdleEvent/ActivityAfterIdle
+	Sequence      string   // CustomEscapeSequenceEvent
+	Progress      string   // ProgressBarChangedEvent: "*", "appeared", "disappeared"
 }
 
 // TriggerType identifies the kind of trigger.
@@ -105,9 +103,7 @@ const (
 	MatchTypeEventProgressBarChanged   TriggerMatchType = 112
 )
 
-// ============================================================================
 // Factory Functions — Regular Triggers (MatchType < 100)
-// ============================================================================
 
 func NewAlertTrigger(regex, message string) *Trigger {
 	return &Trigger{Type: TriggerAlert, Regex: regex, Param: message, Enabled: true}
@@ -233,9 +229,7 @@ func NewStopTrigger(regex string) *Trigger {
 	return &Trigger{Type: TriggerStop, Regex: regex, Enabled: true}
 }
 
-// ============================================================================
 // Factory Functions — Event Triggers (MatchType >= 100)
-// ============================================================================
 
 func eventTrigger(t TriggerType, mt TriggerMatchType, eventParams map[string]interface{}) *Trigger {
 	return &Trigger{Type: t, MatchType: mt, EventParams: eventParams, Enabled: true}
@@ -319,9 +313,7 @@ func NewProgressBarChangedEventTrigger(filter string) *Trigger {
 		map[string]interface{}{"progressBarFilter": filter})
 }
 
-// ============================================================================
 // Serialisation / Deserialisation
-// ============================================================================
 
 func (t *Trigger) encode() map[string]interface{} {
 	m := map[string]interface{}{
@@ -431,9 +423,7 @@ func encodeTriggers(triggers []*Trigger) []interface{} {
 	return result
 }
 
-// ============================================================================
 // Profile-level convenience functions
-// ============================================================================
 
 // GetTriggers reads triggers from the session's profile.
 func GetTriggers(ctx context.Context, caller Caller, sessionID string) ([]*Trigger, error) {
@@ -473,10 +463,6 @@ func SetTriggers(ctx context.Context, caller Caller, sessionID string, triggers 
 	}
 	return SetProfileProperty(ctx, caller, sessionID, "Triggers", string(raw))
 }
-
-// ============================================================================
-// Convenience helpers
-// ============================================================================
 
 // Actions returns the decoded parameter as actions (for triggers with multiple values).
 func (t *Trigger) Actions() []string {
@@ -529,27 +515,19 @@ func (t *Trigger) String() string {
 	return fmt.Sprintf("%s(regex=%q enabled=%v)", t.Type, t.Regex, t.Enabled)
 }
 
-// ============================================================================
 // BounceTrigger.Action mapping (convenience)
-// ============================================================================
 
 const (
 	BounceUntilActivated = 0
 	BounceOnce           = 1
 )
 
-// ============================================================================
 // BufferInputTrigger.Action mapping (convenience)
-// ============================================================================
 
 const (
 	BufferInputStart = 0
 	BufferInputStop  = 1
 )
-
-// ============================================================================
-// MarkTrigger param encoding
-// ============================================================================
 
 // MarkStopScrolling returns the param value for a MarkTrigger with stop scrolling.
 func MarkStopScrolling() string { return "1" }
@@ -557,9 +535,7 @@ func MarkStopScrolling() string { return "1" }
 // MarkNoStopScrolling returns the param value for a MarkTrigger without stop scrolling.
 func MarkNoStopScrolling() string { return "0" }
 
-// ============================================================================
 // CommandFinishedEvent exitCodeFilter helpers
-// ============================================================================
 
 const (
 	ExitCodeAny     = "*"
@@ -570,9 +546,7 @@ const (
 // ExitCodeFilter returns an exit-code filter string from an int.
 func ExitCodeFilter(code int) string { return strconv.Itoa(code) }
 
-// ============================================================================
 // ProgressBarChangedEvent filter helpers
-// ============================================================================
 
 const (
 	ProgressAny         = "*"

@@ -657,3 +657,50 @@ func GetSelection(ctx context.Context, caller Caller, sessionID string) (*iterm2
 	}
 	return resp.GetSelectionResponse().GetGetSelectionResponse(), nil
 }
+
+// GetBroadcastDomains returns the current broadcast domains.
+func GetBroadcastDomains(ctx context.Context, caller Caller) (*iterm2.GetBroadcastDomainsResponse, error) {
+	msg := newRequest()
+	msg.Submessage = &iterm2.ClientOriginatedMessage_GetBroadcastDomainsRequest{
+		GetBroadcastDomainsRequest: &iterm2.GetBroadcastDomainsRequest{},
+	}
+	resp, err := caller.Call(ctx, msg)
+	if err != nil {
+		return nil, err
+	}
+	if err = checkError(resp); err != nil {
+		return nil, err
+	}
+	return resp.GetGetBroadcastDomainsResponse(), nil
+}
+
+// SetBroadcastDomains sets the broadcast domains.
+func SetBroadcastDomains(ctx context.Context, caller Caller, domains []*iterm2.BroadcastDomain) error {
+	msg := newRequest()
+	msg.Submessage = &iterm2.ClientOriginatedMessage_SetBroadcastDomainsRequest{
+		SetBroadcastDomainsRequest: &iterm2.SetBroadcastDomainsRequest{
+			BroadcastDomains: domains,
+		},
+	}
+	resp, err := caller.Call(ctx, msg)
+	if err != nil {
+		return err
+	}
+	return checkError(resp)
+}
+
+// ReorderTabs reorders tabs within windows.
+// Each assignment specifies a window and the desired tab order.
+func ReorderTabs(ctx context.Context, caller Caller, assignments []*iterm2.ReorderTabsRequest_Assignment) error {
+	msg := newRequest()
+	msg.Submessage = &iterm2.ClientOriginatedMessage_ReorderTabsRequest{
+		ReorderTabsRequest: &iterm2.ReorderTabsRequest{
+			Assignments: assignments,
+		},
+	}
+	resp, err := caller.Call(ctx, msg)
+	if err != nil {
+		return err
+	}
+	return checkError(resp)
+}

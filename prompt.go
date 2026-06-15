@@ -10,10 +10,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// PromptState
-// ============================================================================
-
 // PromptState describes the lifecycle of a shell prompt.
 type PromptState int
 
@@ -22,10 +18,6 @@ const (
 	PromptRunning  PromptState = 1 // Command is executing
 	PromptFinished PromptState = 2 // Command has completed
 )
-
-// ============================================================================
-// Prompt
-// ============================================================================
 
 // Prompt wraps GetPromptResponse from a shell prompt.
 type Prompt struct {
@@ -101,10 +93,6 @@ func (p *Prompt) ExcludedSubranges() []CoordRange {
 // Raw returns the underlying proto response.
 func (p *Prompt) Raw() *iterm2.GetPromptResponse { return p.raw }
 
-// ============================================================================
-// Convenience functions
-// ============================================================================
-
 // GetLastPrompt retrieves the most recent prompt for a session.
 // Returns nil if PROMPT_UNAVAILABLE.
 func GetLastPrompt(ctx context.Context, caller Caller, sessionID string) (*Prompt, error) {
@@ -177,10 +165,6 @@ func ListPromptIDs(ctx context.Context, caller Caller, sessionID, first, last st
 	return resp.GetListPromptsResponse().GetUniquePromptId(), nil
 }
 
-// ============================================================================
-// PromptEvent
-// ============================================================================
-
 // PromptEvent is produced by PromptMonitor on each prompt-state change.
 type PromptEvent struct {
 	Mode    iterm2.PromptMonitorMode // PROMPT / COMMAND_START / COMMAND_END
@@ -191,10 +175,6 @@ type PromptEvent struct {
 	// UniquePromptID is set when the notification includes it.
 	UniquePromptID string
 }
-
-// ============================================================================
-// PromptMonitor
-// ============================================================================
 
 // PromptMonitor streams prompt lifecycle events.  Create one with
 // NewPromptMonitor, iterate over Chan(), and call Close() when finished.

@@ -9,10 +9,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// Menu Item Identifiers
-// ============================================================================
-
 // Menu items use the identifier strings from Python's MenuItemIdentifier.
 // The value is the second field (identifier), not the display title.
 // Hierarchical names use dots as separators (e.g., "Edit.Find.Find...").
@@ -283,10 +279,6 @@ const (
 	MenuItemOpenSourceLicenses      = "Open Source Licenses"
 	MenuItemGPURendererAvailability = "GPU Renderer Availability"
 )
-
-// ============================================================================
-// Menu Item Operations
-// ============================================================================
 
 // SelectMenuItem selects a menu item by its identifier string.
 func SelectMenuItem(ctx context.Context, caller Caller, identifier string) error {

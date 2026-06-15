@@ -8,10 +8,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// WindowStatus
-// ============================================================================
-
 // WindowStatus describes the window focus change reason.
 type WindowStatus int
 
@@ -21,19 +17,11 @@ const (
 	WindowResignedKey WindowStatus = 2
 )
 
-// ============================================================================
-// WindowFocusChange
-// ============================================================================
-
 // WindowFocusChange reports a window-level focus change.
 type WindowFocusChange struct {
 	WindowID string
 	Status   WindowStatus
 }
-
-// ============================================================================
-// FocusUpdate
-// ============================================================================
 
 // FocusUpdate is produced by FocusMonitor on each focus change.
 // Exactly one field will be non-nil/non-zero.
@@ -78,10 +66,6 @@ func focusUpdateFromProto(n *iterm2.FocusChangedNotification) *FocusUpdate {
 	}
 	return u
 }
-
-// ============================================================================
-// FocusMonitor
-// ============================================================================
 
 // FocusMonitor streams focus-change events.  Create one with
 // NewFocusMonitor, iterate over Chan(), and call Close() when finished.

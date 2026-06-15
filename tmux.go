@@ -9,10 +9,6 @@ import (
 	iterm2 "github.com/phpgao/term2go/proto"
 )
 
-// ============================================================================
-// TmuxConnection
-// ============================================================================
-
 // TmuxConnection represents an open tmux integration connection.
 type TmuxConnection struct {
 	caller Caller
@@ -113,9 +109,7 @@ func (t *TmuxConnection) CreateWindow(ctx context.Context, affinity string) (str
 	return tr.GetCreateWindow().GetTabId(), nil
 }
 
-// ============================================================================
 // Top-level helpers
-// ============================================================================
 
 // GetTmuxConnections returns all open tmux connections.
 func GetTmuxConnections(ctx context.Context, caller Caller) ([]*TmuxConnection, error) {
